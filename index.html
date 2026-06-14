@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mandanten-Onboarding — Die Berater</title>
+<style>
+:root{
+  --primary:#1a3a5c;--primary-d:#0f2540;--primary-dd:#0a1a2e;
+  --primary-l:#e8f0f8;--primary-m:#8ab0d4;
+  --teal:#1D9E75;--teal-d:#0F6E56;--teal-dd:#085041;
+  --teal-l:#E1F5EE;--teal-m:#9FE1CB;
+  --blue-l:#E6F1FB;--blue-b:#85B7EB;--blue-d:#0C447C;
+  --amber-l:#FAEEDA;--amber-b:#FAC775;--amber-d:#633806;
+  --red-l:#FCEBEB;--red-b:#F09595;--red-d:#A32D2D;
+  --gray:#888;--border:#ddd;--bg:#f5f5f2;--white:#fff;
+  --radius:8px;--radius-lg:12px;
+  --shadow:0 2px 8px rgba(0,0,0,0.06);
+  --shadow-lg:0 8px 24px rgba(0,0,0,0.1);
+}
+[data-theme="dark"]{--bg:#1a1a1a;--white:#242424;--border:#333;--gray:#999;--primary-l:#1a2a3a;color:#e0e0e0}
+[data-theme="dark"] body{color:#e0e0e0}
+[data-theme="dark"] .field input,[data-theme="dark"] .field select,[data-theme="dark"] .field textarea{color:#e0e0e0;background:var(--white)}
+[data-theme="dark"] .type-card h3,[data-theme="dark"] .kind-title{color:#e0e0e0}
+[data-theme="dark"] .sum-v{color:#e0e0e0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:#1a1a1a;font-size:15px;transition:background .3s,color .3s}
+.page{max-width:880px;margin:0 auto;padding:24px 16px 80px}
+
+/* Header */
+.kanzlei-header{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);padding:18px 24px;margin-bottom:18px;display:flex;align-items:center;gap:16px;box-shadow:var(--shadow)}
+.kanzlei-logo{width:48px;height:48px;background:var(--primary);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.kanzlei-logo svg{width:28px;height:28px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.kanzlei-header h1{font-size:17px;font-weight:700;color:var(--primary-dd)}
+.kanzlei-header p{font-size:12px;color:var(--gray);margin-top:2px}
+.header-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+.theme-btn{border:1px solid var(--border);border-radius:var(--radius);padding:7px 11px;font-size:13px;cursor:pointer;background:var(--white);color:var(--gray);font-family:inherit;transition:all .2s}
+.theme-btn:hover{border-color:var(--primary);color:var(--primary)}
+
+/* Steps nav */
+.steps-nav{display:flex;gap:0;margin-bottom:16px;background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;overflow-x:auto;box-shadow:var(--shadow)}
+.step-btn{padding:11px 14px;font-size:11px;cursor:pointer;border:none;background:none;color:var(--gray);border-bottom:3px solid transparent;white-space:nowrap;font-family:inherit;font-weight:500;transition:all .15s}
+.step-btn.active{color:var(--primary);border-bottom-color:var(--primary);background:var(--primary-l)}
+.step-btn.done{color:var(--teal-d)}
+.step-btn.done::before{content:'✓ ';font-size:10px}
+.step-btn.has-error{border-bottom-color:var(--red-d)!important;color:var(--red-d)!important}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--border);color:var(--gray);font-size:10px;margin-right:4px;font-weight:700}
+.step-btn.active .step-num{background:var(--primary);color:#fff}
+.step-btn.done .step-num{background:var(--teal);color:#fff}
+
+/* Progress */
+.progress-wrap{margin-bottom:18px}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--gray);margin-bottom:5px}
+.progress-track{height:5px;background:#e8e8e5;border-radius:3px;overflow:hidden}
+.progress-fill{height:5px;background:var(--primary);border-radius:3px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+
+/* Sections */
+.section{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);padding:22px;margin-bottom:14px;box-shadow:var(--shadow);animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.section-title{font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.section-title svg{width:14px;height:14px;stroke:var(--primary);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* Grid & fields */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.col2{grid-column:1/-1}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:12px;color:#555;font-weight:600;display:flex;align-items:center;gap:4px}
+.field input,.field select,.field textarea{border:1px solid var(--border);border-radius:var(--radius);padding:9px 11px;font-size:14px;background:var(--white);color:#1a1a1a;width:100%;font-family:inherit;transition:all .2s}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-l)}
+.field input.error,.field select.error,.field textarea.error{border-color:var(--red-d);background:var(--red-l)}
+.field textarea{resize:vertical;min-height:80px}
+.field .hint{font-size:11px;color:var(--gray);margin-top:1px}
+.req{color:var(--primary)}
+.err-msg{color:var(--red-d);font-size:11px;margin-top:2px;display:none}
+.err-msg.show{display:block}
+
+/* Toggle buttons */
+.tgl{display:flex;gap:5px;flex-wrap:wrap;margin-top:3px}
+.tb{border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px;font-size:12px;cursor:pointer;background:var(--white);color:#333;font-family:inherit;font-weight:500;transition:all .15s}
+.tb:hover{border-color:var(--primary);transform:translateY(-1px)}
+.tb.on{border-color:var(--primary);background:var(--primary-l);color:var(--primary-dd);font-weight:600;box-shadow:0 2px 4px rgba(26,58,92,0.15)}
+.tb.error{border-color:var(--red-d);background:var(--red-l)}
+
+/* Type cards */
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.type-card{background:var(--white);border:2px solid var(--border);border-radius:var(--radius-lg);padding:24px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;position:relative;overflow:hidden}
+.type-card:hover{border-color:var(--primary-m);transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.type-card.active{border-color:var(--primary);background:var(--primary-l)}
+.type-card svg{width:30px;height:30px;stroke:var(--primary);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;display:block;margin-bottom:10px}
+.type-card h3{font-size:16px;font-weight:700;color:#1a1a1a;margin-bottom:5px}
+.type-card p{font-size:13px;color:var(--gray);line-height:1.4}
+.type-card .check-icon{position:absolute;top:14px;right:14px;width:22px;height:22px;background:var(--primary);color:#fff;border-radius:50%;display:none;align-items:center;justify-content:center;font-size:13px}
+.type-card.active .check-icon{display:flex}
+
+/* Info/warn/error boxes */
+.infobox{background:var(--blue-l);border:1px solid var(--blue-b);border-radius:var(--radius);padding:11px 13px;font-size:12px;color:var(--blue-d);display:flex;gap:9px;align-items:flex-start;margin-bottom:14px}
+.infobox svg{width:15px;height:15px;stroke:var(--blue-d);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;margin-top:1px}
+.warnbox{background:var(--amber-l);border:1px solid var(--amber-b);border-radius:var(--radius);padding:11px 13px;font-size:12px;color:var(--amber-d);display:flex;gap:9px;align-items:flex-start;margin-bottom:14px}
+.warnbox svg{width:15px;height:15px;stroke:var(--amber-d);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;margin-top:1px}
+.errorbox{background:var(--red-l);border:1px solid var(--red-b);border-radius:var(--radius);padding:11px 13px;font-size:12px;color:var(--red-d);display:flex;gap:9px;align-items:flex-start;margin-bottom:14px}
+.errorbox svg{width:15px;height:15px;stroke:var(--red-d);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;margin-top:1px}
+
+/* Person cards (Gesellschafter / Vertreter) */
+.person-card{border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:10px;background:var(--white);transition:all .2s}
+.person-card:hover{border-color:var(--primary-m);box-shadow:var(--shadow)}
+.person-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.person-title{font-size:14px;font-weight:600;color:#1a1a1a;display:flex;align-items:center;gap:8px}
+
+/* Child cards */
+.kind-card{border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;margin-bottom:10px;background:var(--white);transition:all .2s}
+.kind-card:hover{border-color:var(--primary-m);box-shadow:var(--shadow)}
+.kind-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.kind-title{font-size:14px;font-weight:600;color:#1a1a1a;display:flex;align-items:center;gap:8px}
+.badge{display:inline-block;font-size:10px;padding:3px 9px;border-radius:20px;font-weight:600}
+.b-teal{background:var(--teal-l);color:var(--teal-dd)}
+.b-blue{background:var(--blue-l);color:var(--blue-d)}
+.b-amber{background:var(--amber-l);color:var(--amber-d)}
+.del-btn{border:1px solid var(--border);border-radius:var(--radius);padding:5px 11px;font-size:12px;cursor:pointer;background:var(--white);color:var(--gray);font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:4px}
+.del-btn:hover{border-color:var(--red-b);color:var(--red-d);background:var(--red-l)}
+.add-btn{border:2px dashed var(--primary-m);border-radius:var(--radius);padding:11px 16px;font-size:14px;cursor:pointer;background:none;color:var(--primary);font-family:inherit;font-weight:600;display:flex;align-items:center;gap:8px;margin-top:6px;width:100%;justify-content:center;transition:all .2s}
+.add-btn:hover{background:var(--primary-l);border-color:var(--primary);transform:translateY(-1px)}
+
+/* Nav bar */
+.nav-bar{display:flex;gap:10px;margin-top:24px;padding-top:18px;border-top:1px solid var(--border)}
+.btn-primary{flex:1;background:var(--primary);color:#fff;border:none;border-radius:var(--radius);padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;box-shadow:0 2px 8px rgba(26,58,92,0.3)}
+.btn-primary:hover{background:var(--primary-d);transform:translateY(-1px);box-shadow:0 4px 12px rgba(26,58,92,0.4)}
+.btn-secondary{border:1px solid var(--border);border-radius:var(--radius);padding:10px 18px;font-size:13px;cursor:pointer;background:var(--white);color:#333;font-family:inherit;font-weight:500;transition:all .2s;display:flex;align-items:center;gap:6px}
+.btn-secondary:hover{border-color:var(--primary);color:var(--primary);transform:translateY(-1px)}
+.btn-print{border:1px solid var(--primary);border-radius:var(--radius);padding:10px 18px;font-size:13px;cursor:pointer;background:var(--primary-l);color:var(--primary);font-family:inherit;font-weight:600;transition:all .2s}
+.btn-print:hover{background:var(--primary);color:#fff}
+.btn-export{border:1px solid var(--blue-b);border-radius:var(--radius);padding:10px 18px;font-size:13px;cursor:pointer;background:var(--blue-l);color:var(--blue-d);font-family:inherit;font-weight:600;transition:all .2s}
+.btn-export:hover{background:var(--blue-b);color:#fff}
+
+/* Summary */
+.sum-card{border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:10px;background:var(--white);box-shadow:var(--shadow)}
+.sum-head{background:var(--primary-l);padding:11px 16px;font-size:11px;font-weight:700;color:var(--primary-dd);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px}
+.sum-row{display:flex;justify-content:space-between;align-items:center;padding:9px 16px;border-bottom:1px solid #f0f0ee;font-size:13px;transition:background .15s}
+.sum-row:hover{background:rgba(26,58,92,0.03)}
+.sum-row:last-child{border-bottom:none}
+.sum-k{color:var(--gray);font-weight:500}
+.sum-v{font-weight:600;color:#1a1a1a;text-align:right;max-width:55%;word-break:break-word}
+.sum-v.empty{color:var(--gray);font-style:italic}
+
+/* Done banner */
+.done-banner{background:var(--primary-l);border:1px solid var(--primary-m);border-radius:var(--radius-lg);padding:26px;text-align:center;margin-bottom:18px;animation:slideDown .4s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+.done-banner .check{font-size:40px;display:block;margin-bottom:8px}
+.done-banner h2{font-size:17px;font-weight:700;color:var(--primary-dd)}
+.done-banner p{font-size:13px;color:var(--primary);margin-top:5px}
+
+/* Validation summary */
+.val-summary{background:var(--red-l);border:1px solid var(--red-b);border-radius:var(--radius);padding:12px 14px;font-size:12px;color:var(--red-d);margin-bottom:14px}
+.val-summary strong{display:block;margin-bottom:6px;font-size:13px}
+.val-summary ul{padding-left:18px;line-height:1.8}
+.val-summary a{color:var(--red-d);font-weight:600;cursor:pointer;text-decoration:underline}
+
+/* Autosave & undo */
+.autosave-indicator{position:fixed;bottom:18px;right:18px;background:var(--teal);color:#fff;padding:9px 14px;border-radius:var(--radius);font-size:12px;font-weight:500;display:none;align-items:center;gap:7px;box-shadow:var(--shadow-lg);z-index:1000;animation:slideUp .3s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.autosave-indicator.show{display:flex}
+.autosave-indicator.saving{background:var(--gray)}
+.undo-bar{position:fixed;bottom:18px;left:18px;display:flex;gap:5px;z-index:1000}
+.undo-btn{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:7px 11px;font-size:12px;cursor:pointer;color:var(--gray);font-family:inherit;transition:all .2s;box-shadow:var(--shadow)}
+.undo-btn:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
+.undo-btn:disabled{opacity:.4;cursor:not-allowed}
+
+@media print{
+  .steps-nav,.nav-bar,.btn-primary,.btn-secondary,.btn-print,.btn-export,.no-print,.autosave-indicator,.undo-bar,.theme-btn{display:none!important}
+  body{background:#fff}
+  .section{break-inside:avoid;box-shadow:none;border:1px solid #ddd}
+}
+@media(max-width:640px){
+  .grid{grid-template-columns:1fr}
+  .col2{grid-column:1}
+  .type-grid{grid-template-columns:1fr}
+  .steps-nav{flex-wrap:nowrap}
+  .kanzlei-header{flex-wrap:wrap}
+  .header-actions{width:100%;justify-content:flex-end;margin-top:8px}
+  .sum-row{flex-direction:column;align-items:flex-start;gap:4px}
+  .sum-v{max-width:100%;text-align:left}
+  .undo-bar{display:none}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="kanzlei-header">
+  <div class="kanzlei-logo">
+    <svg viewBox="0 0 24 24" stroke-linejoin="round">
+      <line x1="12" y1="3" x2="12" y2="21"/>
+      <path d="M8 8H4l4 7H4"/>
+      <path d="M16 8h4l-4 7h4"/>
+      <line x1="5" y1="8" x2="19" y2="8"/>
+      <line x1="8" y1="21" x2="16" y2="21"/>
+    </svg>
+  </div>
+  <div>
+    <h1>Mandanten-Onboarding</h1>
+    <p>Die Berater — Privat &amp; Unternehmen</p>
+  </div>
+  <div class="header-actions no-print">
+    <button class="theme-btn" onclick="toggleTheme()" title="Dark Mode">🌙</button>
+    <button class="btn-secondary" onclick="confirmReset()" title="Neu starten">🗑 Neu</button>
+    <button class="btn-print" onclick="window.print()">🖨 PDF</button>
+  </div>
+</div>
+
+<div class="steps-nav" id="stepsNav"></div>
+<div class="progress-wrap">
+  <div class="progress-label">
+    <span id="stepLabel">Schritt 1</span>
+    <span id="stepPct">0%</span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+</div>
+
+<div id="pages"></div>
+</div>
+
+<div class="autosave-indicator" id="autosaveInd">
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20,6 9,17 4,12"/></svg>
+  <span id="autosaveText">Gespeichert</span>
+</div>
+
+<div class="undo-bar no-print">
+  <button class="undo-btn" id="undoBtn" onclick="undo()" disabled title="Rückgängig (Ctrl+Z)">↩ Rückgängig</button>
+  <button class="undo-btn" id="redoBtn" onclick="redo()" disabled title="Wiederherstellen (Ctrl+Y)">↪ Wiederherstellen</button>
+</div>
+
+<script>
+const STORAGE_KEY = 'die_berater_onboarding_v2';
+const HISTORY_LIMIT = 50;
+let D = {};
+let currentStep = 0;
+let hist = [];
+let histIdx = -1;
+let isUndoing = false;
+
+// Firma: kein Familie & Kinder
+const STEPS_PRIV = ['Mandantentyp','Persönliche Daten','Familie & Kinder','Kommunikation','Adresse & Finanzamt','Bankverbindung','Leistungen','Zusammenfassung'];
+const STEPS_FIRM = ['Mandantentyp','Unternehmen','Ansprechpartner','Kommunikation','Adresse & Finanzamt','Bankverbindung','Leistungen','Zusammenfassung'];
+function steps(){ return D.mtype==='firma' ? STEPS_FIRM : STEPS_PRIV; }
+
+const SVG = {
+  user:'<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  building:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h1M9 13h1M9 17h1M14 9h1M14 13h1M14 17h1"/></svg>',
+  heart:'<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>',
+  phone:'<svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 14.92v2z"/></svg>',
+  map:'<svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+  bank:'<svg viewBox="0 0 24 24"><path d="M3 22V12M21 22V12M6 22V12M18 22V12M9 22V12M15 22V12M12 22V12M2 12l10-9 10 9H2z"/></svg>',
+  check:'<svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>',
+  lock:'<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>',
+  info:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
+  warn:'<svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  baby:'<svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="2"/><path d="M9 12H5l2 9h10l2-9h-4M9 12c0-3 1.5-5 3-5s3 2 3 5"/></svg>'
+};
+
+// VALIDATORS
+const V = {
+  email: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+  iban: v => {
+    var s = v.replace(/\s/g,'').toUpperCase();
+    if(s.length<15||s.length>34) return false;
+    var r=s.slice(4)+s.slice(0,4);
+    var n=Array.from(r).map(c=>/[A-Z]/.test(c)?(c.charCodeAt(0)-55).toString():c).join('');
+    var rem=n;
+    while(rem.length>2) rem=(parseInt(rem.slice(0,9),10)%97).toString()+rem.slice(9);
+    return parseInt(rem,10)%97===1;
+  },
+  steuerid: v => /^\d{11}$/.test(v.replace(/\s/g,'')),
+  plz: v => /^\d{5}$/.test(v.replace(/\s/g,'')),
+  phone: v => /^[\+0-9\s\-\(\)]{6,}$/.test(v),
+  required: v => v && v.toString().trim().length > 0
+};
+
+const REQUIRED_FIELDS = {
+  'Persönliche Daten': [{key:'anrede',label:'Anrede',v:'required'},{key:'vorname',label:'Vorname',v:'required'},{key:'nachname',label:'Nachname',v:'required'}],
+  'Unternehmen': [{key:'firmenname',label:'Firmenname',v:'required'},{key:'rechtsform',label:'Rechtsform',v:'required'}],
+  'Ansprechpartner': [{key:'ap_vn',label:'Vorname Ansprechpartner',v:'required'},{key:'ap_nn',label:'Nachname Ansprechpartner',v:'required'}],
+  'Kommunikation': [{key:'email',label:'E-Mail',v:'email'}],
+  'Adresse & Finanzamt': [{key:'strasse',label:'Straße & Hausnummer',v:'required'},{key:'plz',label:'PLZ',v:'plz'},{key:'ort',label:'Ort',v:'required'}],
+  'Bankverbindung': [{key:'iban',label:'IBAN',v:'iban'}]
+};
+
+function validateStep(n){ var f=REQUIRED_FIELDS[n]||[],e={}; f.forEach(function(x){if(!V[x.v](D[x.key]||''))e[x.key]=x.label;}); return e; }
+function validateAll(){ var a={}; steps().forEach(function(n){ Object.assign(a,validateStep(n)); }); return a; }
+
+// HISTORY
+function pushHistory(){
+  if(isUndoing) return;
+  var snap=JSON.stringify({data:D,step:currentStep});
+  if(hist[histIdx]===snap) return;
+  hist=hist.slice(0,histIdx+1); hist.push(snap);
+  if(hist.length>HISTORY_LIMIT) hist.shift(); else histIdx++;
+  updateUndoBtns();
+}
+function undo(){ if(histIdx>0){isUndoing=true;histIdx--;var s=JSON.parse(hist[histIdx]);D=s.data;currentStep=s.step;renderAll();showAutosave('Rückgängig');updateUndoBtns();setTimeout(()=>{isUndoing=false;},50);} }
+function redo(){ if(histIdx<hist.length-1){isUndoing=true;histIdx++;var s=JSON.parse(hist[histIdx]);D=s.data;currentStep=s.step;renderAll();showAutosave('Wiederhergestellt');updateUndoBtns();setTimeout(()=>{isUndoing=false;},50);} }
+function updateUndoBtns(){ document.getElementById('undoBtn').disabled=histIdx<=0; document.getElementById('redoBtn').disabled=histIdx>=hist.length-1; }
+
+// STORAGE
+function saveToStorage(){ try{localStorage.setItem(STORAGE_KEY,JSON.stringify({data:D,step:currentStep,ts:Date.now()}));showAutosave('Gespeichert');}catch(e){} }
+function loadFromStorage(){ try{var raw=localStorage.getItem(STORAGE_KEY);if(raw){var s=JSON.parse(raw);if(s.data)D=s.data;if(s.step!==undefined)currentStep=s.step;return true;}}catch(e){}return false; }
+function confirmReset(){ if(confirm('Alle Eingaben löschen und neu starten?')){localStorage.removeItem(STORAGE_KEY);D={};currentStep=0;hist=[];histIdx=-1;renderAll();} }
+var autosaveTO;
+function debouncedSave(){ clearTimeout(autosaveTO);showAutosave('Speichern...','saving');autosaveTO=setTimeout(()=>{saveToStorage();pushHistory();},600); }
+function showAutosave(text,type){ var el=document.getElementById('autosaveInd');el.className='autosave-indicator show '+(type||'saved');document.getElementById('autosaveText').textContent=text;if((type||'saved')!=='saving')setTimeout(()=>{el.classList.remove('show');},2000); }
+
+// MANDANTENNUMMER
+function generateMandantenNr(){ if(D.intmandnr)return D.intmandnr;var p=D.mtype==='firma'?'F':'P';var d=new Date();return p+d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+'-'+Math.floor(Math.random()*9000+1000); }
+
+// THEME
+function toggleTheme(){ var h=document.documentElement;h.getAttribute('data-theme')==='dark'?h.removeAttribute('data-theme'):h.setAttribute('data-theme','dark'); }
+
+// FIELD HELPERS
+function fld(label,key,type,placeholder,opts,req,validator,hint){
+  type=type||'text';placeholder=placeholder||'';req=req||false;
+  var val=D[key]||'';
+  var hasErr=D._err&&D._err[key];
+  var errMsg=hasErr?getErrMsg(validator,label):'';
+  var chg='updateField(\''+key+'\',this.value)'+(validator?';validateField(\''+key+'\',this.value,\''+validator+'\')':'');
+  var inp;
+  if(type==='select'){
+    var o='<option value="">— wählen —</option>';
+    (opts||[]).forEach(v=>o+='<option value="'+v+'" '+(val===v?'selected':'')+'>'+v+'</option>');
+    inp='<select id="fld_'+key+'" class="'+(hasErr?'error':'')+'" onchange="'+chg+'">'+o+'</select>';
+  } else if(type==='textarea'){
+    inp='<textarea id="fld_'+key+'" class="'+(hasErr?'error':'')+'" placeholder="'+placeholder+'" onchange="'+chg+'">'+val+'</textarea>';
+  } else {
+    inp='<input type="'+type+'" id="fld_'+key+'" class="'+(hasErr?'error':'')+'" value="'+esc(val)+'" placeholder="'+placeholder+'" onchange="'+chg+'" onblur="'+(validator?'validateField(\''+key+'\',this.value,\''+validator+'\')':'')+'">';
+  }
+  var r=req?'<span class="req">*</span>':'';
+  var h=hint?'<div class="hint">'+hint+'</div>':'';
+  var e='<div class="err-msg '+(hasErr?'show':'')+'" id="err_'+key+'">'+errMsg+'</div>';
+  return '<div class="field"><label>'+label+r+'</label>'+inp+h+e+'</div>';
+}
+function getErrMsg(v,l){ if(v==='email')return 'Bitte gültige E-Mail eingeben';if(v==='iban')return 'Ungültige IBAN';if(v==='steuerid')return 'Steuer-ID: 11 Ziffern';if(v==='plz')return 'PLZ: 5 Ziffern';return l+' ist Pflichtfeld'; }
+function esc(v){ return String(v).replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function updateField(key,value){ D[key]=value;if(D._err)delete D._err[key];debouncedSave(); }
+function validateField(key,value,validator){
+  if(!validator)return true;
+  var valid=V[validator]?V[validator](value):true;
+  if(!valid){if(!D._err)D._err={};D._err[key]=true;}else if(D._err)delete D._err[key];
+  var errEl=document.getElementById('err_'+key);
+  var fldEl=document.getElementById('fld_'+key);
+  if(errEl){errEl.textContent=valid?'':getErrMsg(validator,key);errEl.className='err-msg '+(valid?'':'show');}
+  if(fldEl)fldEl.classList.toggle('error',!valid);
+  return valid;
+}
+function tgl(label,key,options,multi,req){
+  multi=multi||false;req=req||false;
+  var val=D[key]||(multi?[]:'');
+  var hasErr=D._err&&D._err[key];
+  var btns='';
+  options.forEach(function(v){
+    var on=multi?(Array.isArray(val)&&val.indexOf(v)>-1):val===v;
+    var click=multi?'onclick="toggleArr(\''+key+'\',\''+v+'\');debouncedSave()"':'onclick="D[\''+key+'\']=\''+v+'\';if(D._err)delete D._err[\''+key+'\'];debouncedSave();renderAll()"';
+    btns+='<button class="tb '+(on?'on ':'')+(hasErr?'error':'')+'" '+click+'>'+v+'</button>';
+  });
+  var r=req?'<span class="req">*</span>':'';
+  var e=hasErr?'<div class="err-msg show">Bitte mindestens eine Option wählen</div>':'';
+  return '<div class="field col2"><label>'+label+r+'</label><div class="tgl">'+btns+'</div>'+e+'</div>';
+}
+function toggleArr(key,val){ if(!D[key])D[key]=[];var i=D[key].indexOf(val);if(i>-1)D[key].splice(i,1);else D[key].push(val);renderAll(); }
+function toggleKind(idx,val){ if(!D.kinder[idx].positionen)D.kinder[idx].positionen=[];var i=D.kinder[idx].positionen.indexOf(val);if(i>-1)D.kinder[idx].positionen.splice(i,1);else D.kinder[idx].positionen.push(val);renderAll(); }
+function sectionTitle(icon,text){ return '<div class="section-title">'+(SVG[icon]||'')+text+'</div>'; }
+function infobox(t){ return '<div class="infobox">'+SVG.info+'<span>'+t+'</span></div>'; }
+function warnbox(t){ return '<div class="warnbox">'+SVG.warn+'<span>'+t+'</span></div>'; }
+function errorbox(t){ return '<div class="errorbox">'+SVG.warn+'<span>'+t+'</span></div>'; }
+
+// ═══════════════ PAGES ═══════════════
+
+function pageType(){
+  return infobox('Wählen Sie den Mandantentyp – der Fragebogen passt sich automatisch an. Alle Eingaben werden lokal gespeichert.')+
+  '<div class="type-grid">'+
+  '<button class="type-card '+(D.mtype==='privat'?'active':'')+'" onclick="D.mtype=\'privat\';currentStep=1;D.intmandnr=generateMandantenNr();debouncedSave();renderAll()">'+
+  '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'+
+  '<div class="check-icon">✓</div><h3>Privatperson</h3>'+
+  '<p>Einkommensteuer, Lohnsteuer, Kapitalvermögen, Erbschaft, private Vermögensverwaltung</p>'+
+  '</button>'+
+  '<button class="type-card '+(D.mtype==='firma'?'active':'')+'" onclick="D.mtype=\'firma\';currentStep=1;D.intmandnr=generateMandantenNr();debouncedSave();renderAll()">'+
+  '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h1M9 13h1M9 17h1M14 9h1M14 13h1M14 17h1"/></svg>'+
+  '<div class="check-icon">✓</div><h3>Unternehmen</h3>'+
+  '<p>GmbH, GbR, Einzelunternehmen, UG, AG, KG, GmbH &amp; Co. KG, Freiberufler</p>'+
+  '</button></div>';
+}
+
+function pagePerson(){
+  return '<div class="section">'+
+  sectionTitle('user','Persönliche Daten')+
+  '<div class="grid">'+
+  fld('Anrede','anrede','select','',['Herr','Frau','Divers'],true,'required')+
+  fld('Titel / Akad. Grad','titel','text','Dr., Prof. …')+
+  fld('Vorname','vorname','text','',null,true,'required')+
+  fld('Nachname','nachname','text','',null,true,'required')+
+  fld('Geburtsdatum','geb','date')+
+  fld('Geburtsort','gebort')+
+  fld('Staatsangehörigkeit','staat','text','Deutsch')+
+  fld('Beruf / Tätigkeit','beruf')+
+  fld('Steuer-Identifikationsnummer','steuerid','text','11 Stellen',null,false,'steuerid','Exakt 11 Ziffern')+
+  fld('Familienstand','famstand','select','',['Ledig','Verheiratet','Eingetr. Lebenspartnerschaft','Getrennt lebend','Geschieden','Verwitwet'])+
+  '</div></div>'+
+  '<div class="section">'+
+  sectionTitle('lock','Legitimation (GwG §11)')+
+  infobox('Identifizierungspflicht vor Aufnahme der Geschäftsbeziehung – Ausweiskopie aufbewahren (5 Jahre).')+
+  '<div class="grid">'+
+  fld('Ausweisart','ausweisart','select','',['Personalausweis','Reisepass','Niederlassungserlaubnis'])+
+  fld('Ausweisnummer','ausweisnr')+
+  fld('Ausgestellt von (Behörde)','ausweisbeh')+
+  fld('Gültig bis','ausweisbis','date')+
+  '</div></div>';
+}
+
+function pageCompany(){
+  return '<div class="section">'+
+  sectionTitle('building','Das Unternehmen')+
+  '<div class="grid">'+
+  fld('Firmenname','firmenname','text','',null,true,'required')+
+  fld('Rechtsform','rechtsform','select','',['GmbH','GbR','Einzelunternehmen','UG (haftungsbeschränkt)','AG','OHG','KG','GmbH & Co. KG','Freiberufler','Partnerschaftsgesellschaft'],true,'required')+
+  fld('Unternehmensgegenstand','gegenstand','text','z.B. Lebensmittelhandel')+
+  fld('Branche','branche')+
+  fld('Betriebsnummer','betriebsnr')+
+  fld('Anzahl Mitarbeiter','mitarb_anz','number')+
+  fld('Gründungsdatum','gruendung','date')+
+  fld('Gesellschaftsvertragsdatum','gesvertrag','date')+
+  fld('Handelsregisternummer','hrbnr')+
+  fld('Registergericht','regericht')+
+  fld('Wirtschaftsjahr von','wjvon','text','z.B. 01.07.')+
+  fld('Wirtschaftsjahr bis','wjbis','text','z.B. 30.06.')+
+  fld('Umsatzsteuer-ID','ustid')+
+  fld('Steuernummer','steuernr_firm')+
+  '</div></div>';
+}
+
+// Ansprechpartner: Gesellschafter & Gesetzliche Vertreter dynamisch (Bild 1)
+function pageContact(){
+  var gesellschafter = D.gesellschafter || [];
+  var vertreter = D.vertreter || [];
+
+  var gsHtml = '';
+  for(var i=0;i<gesellschafter.length;i++){
+    var g=gesellschafter[i];
+    gsHtml += '<div class="person-card"><div class="person-hd">'+
+    '<div class="person-title">👤 Gesellschafter '+(i+1)+'</div>'+
+    '<button class="del-btn" onclick="D.gesellschafter.splice('+i+',1);debouncedSave();renderAll()">✕ Entfernen</button>'+
+    '</div><div class="grid">'+
+    '<div class="field"><label>Anrede</label><select onchange="D.gesellschafter['+i+'].anrede=this.value;debouncedSave()"><option value="">— wählen —</option>'+
+    ['Herr','Frau'].map(v=>'<option '+(g.anrede===v?'selected':'')+'>'+v+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>Vorname</label><input value="'+(g.vn||'')+'" onchange="D.gesellschafter['+i+'].vn=this.value;debouncedSave()"></div>'+
+    '<div class="field"><label>Nachname</label><input value="'+(g.nn||'')+'" onchange="D.gesellschafter['+i+'].nn=this.value;debouncedSave()"></div>'+
+    '<div class="field"><label>Funktion / Rolle</label><input value="'+(g.rolle||'')+'" onchange="D.gesellschafter['+i+'].rolle=this.value;debouncedSave()"></div>'+
+    '<div class="field"><label>Beteiligung %</label><input type="number" value="'+(g.anteil||'')+'" onchange="D.gesellschafter['+i+'].anteil=this.value;debouncedSave()"></div>'+
+    '<div class="field"><label>Art der Beteiligung</label><select onchange="D.gesellschafter['+i+'].art=this.value;debouncedSave()"><option value="">— wählen —</option>'+
+    ['Komplementär','Kommanditist','Gesellschafter','Aktionär'].map(v=>'<option '+(g.art===v?'selected':'')+'>'+v+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>Geburtsdatum</label><input type="date" value="'+(g.geb||'')+'" onchange="D.gesellschafter['+i+'].geb=this.value;debouncedSave()"></div>'+
+    '<div class="field"><label>Identifikationsnummer</label><input value="'+(g.idnr||'')+'" placeholder="11 Stellen" onchange="D.gesellschafter['+i+'].idnr=this.value;debouncedSave()"></div>'+
+    '<div class="field"><label>Ausweisart</label><select onchange="D.gesellschafter['+i+'].ausweisart=this.value;debouncedSave()"><option value="">— wählen —</option>'+
+    ['Personalausweis','Reisepass'].map(v=>'<option '+(g.ausweisart===v?'selected':'')+'>'+v+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>Ausweisnummer</label><input value="'+(g.ausweisnr||'')+'" onchange="D.gesellschafter['+i+'].ausweisnr=this.value;debouncedSave()"></div>'+
+    '</div></div>';
+  }
+
+  var vtHtml = '';
+  for(var j=0;j<vertreter.length;j++){
+    var v=vertreter[j];
+    vtHtml += '<div class="person-card"><div class="person-hd">'+
+    '<div class="person-title">👤 Gesetzlicher Vertreter '+(j+1)+'</div>'+
+    '<button class="del-btn" onclick="D.vertreter.splice('+j+',1);debouncedSave();renderAll()">✕ Entfernen</button>'+
+    '</div><div class="grid">'+
+    '<div class="field"><label>Anrede</label><select onchange="D.vertreter['+j+'].anrede=this.value;debouncedSave()"><option value="">— wählen —</option>'+
+    ['Herr','Frau'].map(x=>'<option '+(v.anrede===x?'selected':'')+'>'+x+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>Vorname</label><input value="'+(v.vn||'')+'" onchange="D.vertreter['+j+'].vn=this.value;debouncedSave()"></div>'+
+    '<div class="field"><label>Nachname</label><input value="'+(v.nn||'')+'" onchange="D.vertreter['+j+'].nn=this.value;debouncedSave()"></div>'+
+    '<div class="field"><label>Funktion</label><input value="'+(v.funk||'')+'" placeholder="z.B. Geschäftsführer" onchange="D.vertreter['+j+'].funk=this.value;debouncedSave()"></div>'+
+    '<div class="field"><label>Geburtsdatum</label><input type="date" value="'+(v.geb||'')+'" onchange="D.vertreter['+j+'].geb=this.value;debouncedSave()"></div>'+
+    '<div class="field"><label>Identifikationsnummer</label><input value="'+(v.idnr||'')+'" placeholder="11 Stellen" onchange="D.vertreter['+j+'].idnr=this.value;debouncedSave()"></div>'+
+    '<div class="field"><label>Ausweisart</label><select onchange="D.vertreter['+j+'].ausweisart=this.value;debouncedSave()"><option value="">— wählen —</option>'+
+    ['Personalausweis','Reisepass'].map(x=>'<option '+(v.ausweisart===x?'selected':'')+'>'+x+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label>Ausweisnummer</label><input value="'+(v.ausweisnr||'')+'" onchange="D.vertreter['+j+'].ausweisnr=this.value;debouncedSave()"></div>'+
+    '<div class="field col2"><label>Privatadresse</label><input value="'+(v.addr||'')+'" onchange="D.vertreter['+j+'].addr=this.value;debouncedSave()"></div>'+
+    '</div></div>';
+  }
+
+  return '<div class="section">'+
+  sectionTitle('user','Gesellschafter')+
+  infobox('Wirtschaftlich Berechtigte (ab 25% Beteiligung) gem. §3 GwG dokumentieren. Transparenzregister prüfen.')+
+  warnbox('Angaben zur Beziehung: Gesellschaftsverhältnis, Beteiligung und Anteil gem. GwG erfassen.')+
+  gsHtml+
+  '<button class="add-btn" onclick="if(!D.gesellschafter)D.gesellschafter=[];D.gesellschafter.push({});debouncedSave();renderAll()">+ Gesellschafter hinzufügen</button>'+
+  '</div>'+
+  '<div class="section">'+
+  sectionTitle('user','Gesetzliche Vertreter / Geschäftsführer')+
+  infobox('Gesetzlichen Vertreter gem. GwG §11 erfassen. Anzeige im Steuerformular beachten.')+
+  vtHtml+
+  '<button class="add-btn" onclick="if(!D.vertreter)D.vertreter=[];D.vertreter.push({});debouncedSave();renderAll()">+ Gesetzlichen Vertreter hinzufügen</button>'+
+  '</div>';
+}
+
+function pageFamilie(){
+  var verheiratet=['Verheiratet','Eingetr. Lebenspartnerschaft'].indexOf(D.famstand)>-1;
+  var getrennt=['Getrennt lebend','Geschieden'].indexOf(D.famstand)>-1;
+  var alleinerziehend=['Ledig','Getrennt lebend','Geschieden','Verwitwet'].indexOf(D.famstand)>-1&&(D.kinder||[]).length>0;
+  var html='<div class="section">'+sectionTitle('heart','Familienstand & Steuerklasse')+'<div class="grid">'+
+  fld('Familienstand','famstand','select','',['Ledig','Verheiratet','Eingetr. Lebenspartnerschaft','Getrennt lebend','Geschieden','Verwitwet'],true);
+  if(verheiratet||getrennt) html+=tgl('Veranlagung','veranlagung',['Zusammenveranlagung (Splitting)','Einzelveranlagung','Einzelveranlagung bes. Steuersatz']);
+  html+=fld('Steuerklasse Mandant','stklasse','select','',['I','II','III','IV','IV mit Faktor','V','VI'])+
+  fld('Kirchensteuer','kirche','select','',['Ja (ev.)','Ja (kath.)','Ja (andere)','Nein'])+'</div></div>';
+  if(verheiratet){
+    html+='<div class="section">'+sectionTitle('heart','Ehegatte / Lebenspartner')+
+    infobox('Angaben zum Ehegatten sind für Zusammenveranlagung, Steuerklassenwahl und Splittingverfahren erforderlich.')+
+    '<div class="grid">'+
+    fld('Anrede Ehegatte','eh_anrede','select','',['Herr','Frau'])+fld('Titel','eh_titel','text','Dr. …')+
+    fld('Vorname','eh_vn','text','',null,true,'required')+fld('Nachname','eh_nn','text','',null,true,'required')+
+    fld('Geburtsdatum','eh_geb','date')+fld('Steuer-ID Ehegatte','eh_steuerid','text','11 Stellen',null,false,'steuerid')+
+    fld('Steuerklasse Ehegatte','eh_stklasse','select','',['I','II','III','IV','IV mit Faktor','V','VI'])+
+    fld('Kirchensteuer Ehegatte','eh_kirche','select','',['Ja (ev.)','Ja (kath.)','Nein'])+
+    fld('Beruf / Tätigkeit','eh_beruf')+fld('Arbeitgeber','eh_ag')+
+    tgl('Einkünfte Ehegatte aus','eh_einkunfte',['Nichtselbstständige Arbeit','Selbstständige Tätigkeit','Gewerbebetrieb','Kapitalvermögen','Vermietung & Verpachtung','Renteneinkünfte','Keine eigenen Einkünfte'],true)+
+    '</div>'+(D.veranlagung==='Zusammenveranlagung (Splitting)'?warnbox('Steuerklasse III/V: Günstiger wenn ein Partner deutlich mehr verdient. IV/IV: Bei ähnlichem Einkommen.'):'')+'</div>';
+  }
+  if(getrennt){
+    html+='<div class="section">'+sectionTitle('user','Trennung / Scheidung')+'<div class="grid">'+
+    fld('Trennung seit','trennung_seit','date')+
+    tgl('Trennungsjahr – Splitting noch möglich?','splitting_moegl',['Ja (Trennungsjahr)','Nein'])+
+    tgl('Unterhalt an Ex-Partner (Real-Splitting §10)','unterhalt_ex',['Ja','Nein'])+
+    (D.unterhalt_ex==='Ja'?fld('Unterhaltsbetrag / Jahr (EUR)','unterhalt_betrag','number','max. 13.805 EUR (2024)'):'')+'</div></div>';
+  }
+  html+='<div class="section">'+sectionTitle('baby','Kinder')+
+  infobox('Kinder relevant für: Kindergeld, Kinderfreibetrag, Entlastungsbetrag Alleinerziehende (Stklasse II), Kinderbetreuungskosten §10, Ausbildungsfreibetrag §33a.');
+  if(alleinerziehend){var eb=4260+((D.kinder||[]).length-1)*240;html+=warnbox('Alleinerziehend: Steuerklasse II prüfen! Entlastungsbetrag '+eb.toLocaleString('de-DE')+' EUR (2024).');}
+  var kinder=D.kinder||[];
+  for(var idx=0;idx<kinder.length;idx++){
+    var k=kinder[idx];
+    var alter=k.geb?Math.floor((Date.now()-new Date(k.geb))/(1000*60*60*24*365.25)):null;
+    var badge='';
+    if(alter!==null){if(alter<18)badge='<span class="badge b-teal">'+alter+' J.</span>';else if(alter<26)badge='<span class="badge b-blue">'+alter+' J. – Berücksichtigung bis 25 prüfen</span>';else badge='<span class="badge b-amber">'+alter+' J. – kein Kinderfreibetrag mehr</span>';}
+    html+='<div class="kind-card"><div class="kind-hd"><div class="kind-title">👶 Kind '+(idx+1)+' '+badge+'</div>'+
+    '<button class="del-btn" onclick="D.kinder.splice('+idx+',1);debouncedSave();renderAll()">✕ Entfernen</button>'+
+    '</div><div class="grid">'+
+    '<div class="field"><label>Vorname <span class="req">*</span></label><input value="'+(k.vorname||'')+'" onchange="D.kinder['+idx+'].vorname=this.value;debouncedSave()"></div>'+
+    '<div class="field"><label>Nachname</label><input value="'+(k.nachname||'')+'" onchange="D.kinder['+idx+'].nachname=this.value;debouncedSave()"></div>'+
+    '<div class="field"><label>Geburtsdatum <span class="req">*</span></label><input type="date" value="'+(k.geb||'')+'" onchange="D.kinder['+idx+'].geb=this.value;debouncedSave();renderAll()"></div>'+
+    '<div class="field"><label>Steuer-ID Kind</label><input value="'+(k.steuerid||'')+'" onchange="D.kinder['+idx+'].steuerid=this.value;debouncedSave()" placeholder="11 Stellen"></div>'+
+    '<div class="field"><label>Im Haushalt lebend</label><div class="tgl">'+['Ja','Nein','Wechselmodell'].map(v=>'<button class="tb '+(k.haushalt===v?'on':'')+'" onclick="D.kinder['+idx+'].haushalt=\''+v+'\';debouncedSave();renderAll()">'+v+'</button>').join('')+'</div></div>'+
+    '<div class="field"><label>Kindergeld bezogen von</label><div class="tgl">'+['Mandant','Ehegatte / Ex-Partner','Keine Berechtigung'].map(v=>'<button class="tb '+(k.kindergeld===v?'on':'')+'" onclick="D.kinder['+idx+'].kindergeld=\''+v+'\';debouncedSave();renderAll()">'+v+'</button>').join('')+'</div></div>';
+    if(alter!==null&&alter>=18&&alter<27){html+='<div class="field col2"><label>Status (volljährig) <span class="badge b-blue">Berücksichtigung bis 25 möglich</span></label><div class="tgl">'+['In Berufsausbildung','Studium','Freiwilliger Dienst (FSJ/BFD)','Übergangszeit (max. 4 Monate)','Arbeitssuchend (gemeldet)','Behinderung (unbefristet)','Keine Berücksichtigung'].map(v=>'<button class="tb '+(k.status===v?'on':'')+'" onclick="D.kinder['+idx+'].status=\''+v+'\';debouncedSave();renderAll()">'+v+'</button>').join('')+'</div></div>';}
+    html+='<div class="field col2"><label>Steuerlich relevante Positionen</label><div class="tgl">'+['Kinderbetreuungskosten §10 Abs.1 Nr.5','Schulgeld §10 Abs.1 Nr.9','Ausbildungsfreibetrag §33a (auswärts)','Behinderungspauschbetrag §33b','Unterhalt an volljähriges Kind (auswärts)'].map(v=>'<button class="tb '+((k.positionen||[]).indexOf(v)>-1?'on':'')+'" onclick="toggleKind('+idx+',\''+v+'\');debouncedSave()">'+v+'</button>').join('')+'</div></div></div></div>';
+  }
+  html+='<button class="add-btn" onclick="if(!D.kinder)D.kinder=[];D.kinder.push({});debouncedSave();renderAll()">+ Kind hinzufügen</button></div>';
+  html+='<div class="section">'+sectionTitle('user','Weitere Unterhaltspflichten & Besonderheiten')+'<div class="grid">'+
+  tgl('Unterhaltspflichten gegenüber','unterhalt_an',['Eltern / Schwiegereltern (§33a)','Volljährige Kinder (auswärts)','Ex-Partner (Real-Splitting)','Andere Angehörige'],true)+
+  ((D.unterhalt_an||[]).length>0?'<div class="field"><label>Unterhalt gesamt / Jahr (EUR)</label><input type="number" value="'+(D.unterhalt_ges||'')+'" onchange="D.unterhalt_ges=this.value;debouncedSave()" placeholder="max. 11.784 EUR §33a (2024)"></div>'+tgl('Empfänger im Ausland?','unterhalt_ausland',['Ja','Nein']):'')+
+  fld('Pflegegrad (eigene Person / Angehörige)','pflegegrad','select','',['Pflegegrad 1','Pflegegrad 2','Pflegegrad 3','Pflegegrad 4','Pflegegrad 5'])+
+  fld('Behinderungsgrad (GdB)','gdb','select','',['unter 50 GdB','50 GdB','60 GdB','70 GdB','80 GdB','90 GdB','100 GdB (Merkzeichen H/Bl/aG)'])+
+  '</div></div>';
+  return html;
+}
+
+// Kommunikation: OHNE interne Zuordnung (Bild 2)
+function pageKomm(){
+  return '<div class="section">'+
+  sectionTitle('phone','Kommunikation')+
+  '<div class="grid">'+
+  fld('Telefon','tel','tel','+49 711 …',null,false,'phone')+
+  fld('Mobil','mobil','tel','',null,false,'phone')+
+  fld('E-Mail','email','email','name@firma.de',null,true,'email')+
+  tgl('Bevorzugter Kommunikationsweg','komm',['E-Mail','Post','Telefon','Mandantenportal'],true)+
+  tgl('Korrespondenzsprache','sprache',['Deutsch','Englisch','Arabisch','Türkisch','Russisch','Andere'],true)+
+  '</div></div>';
+}
+
+function pageAddr(){
+  return '<div class="section">'+
+  sectionTitle('map','Adresse')+
+  '<div class="grid">'+
+  fld('Straße, Hausnummer','strasse','text','',null,true,'required')+
+  fld('PLZ','plz','text','',null,true,'plz','5-stellige Postleitzahl')+
+  fld('Ort','ort','text','',null,true,'required')+
+  fld('Bundesland','bula')+
+  fld('Land','land','text','Deutschland')+
+  '</div></div>'+
+  '<div class="section">'+
+  sectionTitle('map','Finanzamt')+
+  '<div class="grid">'+
+  fld('Zuständiges Finanzamt','fa')+
+  fld('Steuernummer','steuernr_fa')+
+  fld('Umsatzsteuer-ID','ustid_fa')+
+  fld('Steuer-ID (persönlich)','steuerid_fa','text','',null,false,'steuerid')+
+  tgl('Abzugebende Steuererklärungen','steuerart',['ESt','KSt','GewSt','USt','Lohnsteuer','Erbschaftsteuer','Schenkungsteuer','Grundsteuer'],true)+
+  fld('USt-Voranmeldung','ust_rhythmus','select','',['Monatlich','Quartalsweise','Jährlich','Keine'])+
+  fld('Dauerfristverlängerung','dauerfrist','select','',['Ja, vorhanden','Nein','Muss beantragt werden'])+
+  '</div></div>';
+}
+
+// Bankverbindung: NUR IBAN/Bank, KEIN Vergütungsmodell/Zahlungsziel (Bild 3)
+function pageBank(){
+  return '<div class="section">'+
+  sectionTitle('bank','Bankverbindung')+
+  '<div class="grid">'+
+  fld('Kontoinhaber','ki')+
+  fld('IBAN','iban','text','DE00 0000 0000 0000 0000 00',null,true,'iban')+
+  fld('BIC','bic')+
+  fld('Kreditinstitut','bank')+
+  tgl('SEPA-Lastschrift','sepa',['Ja','Nein'])+
+  '</div></div>';
+}
+
+function pageLeistungen(){
+  var isF=D.mtype==='firma';
+  var allSrv=isF?
+    ['Finanzbuchhaltung (laufend)','Lohnbuchhaltung','Jahresabschluss / Bilanz','E/Ü-Rechnung','Körperschaftsteuer','Gewerbesteuer','Umsatzsteuer','Betriebsprüfungsbegleitung','GmbH-Gründungsberatung','Umwandlung / Umstrukturierung','Betriebsnachfolge','Unternehmensberatung allgemein']:
+    ['Einkommensteuererklärung','Umsatzsteuererklärung','Lohnsteuer (Arbeitnehmer)','Kapitalertragsteuer (Anlage KAP)','Erbschaft- / Schenkungsteuer','Grunderwerbsteuer','Anlage V (Vermietung)','Einspruchsverfahren','Elster-Zugang einrichten','Steuerliche Beratung allgemein'];
+  return '<div class="section">'+
+  sectionTitle('check','Beauftragte Leistungen')+
+  tgl('Leistungen (Mehrfachauswahl)','leis',allSrv,true,true)+
+  '<div style="border-top:1px solid #f0f0ee;margin:14px 0"></div>'+
+  '<div class="grid">'+
+  fld('Veranlagungszeitraum / Jahr ab','vz_ab','text','z.B. 2025')+
+  (isF?fld('Buchhaltungsübernahme ab','buch_ab','date'):'')+
+  fld('Anmerkungen / Steuerliche Besonderheiten','notizen','textarea','z.B. Verlustvorträge, laufende Betriebsprüfung …')+
+  '</div></div>';
+}
+
+// SUMMARY – ohne Intern-Block (Bild 4), vollständige Daten
+function pageSummary(){
+  var isF=D.mtype==='firma';
+  var name=isF?(D.firmenname||'-'):((D.titel?D.titel+' ':'')+(D.vorname||'')+' '+(D.nachname||'')).trim()||'-';
+  var kinder=D.kinder||[];
+  var allErrs=validateAll();
+  var errKeys=Object.keys(allErrs);
+  var html='';
+  if(errKeys.length>0){
+    html+='<div class="val-summary"><strong>⚠️ Bitte prüfen Sie folgende Pflichtfelder:</strong><ul>';
+    errKeys.forEach(function(k){html+='<li><a onclick="jumpToField(\''+k+'\')">'+ allErrs[k]+'</a></li>';});
+    html+='</ul></div>';
+  }
+  html+='<div class="done-banner"><span class="check">✅</span><h2>Onboarding vollständig erfasst</h2><p>Bitte prüfen, drucken / als PDF speichern und zur Kanzleiakte nehmen.</p></div>';
+
+  html+='<div class="sum-card"><div class="sum-head">👤 Mandant</div>'+
+  row('Mandanten-Nr.',D.intmandnr)+row('Typ',isF?'Unternehmen':'Privatperson')+row('Name',name)+
+  (isF?row('Rechtsform',D.rechtsform)+row('Branche',D.branche):'')+
+  (!isF?row('Familienstand',D.famstand)+row('Beruf / Tätigkeit',D.beruf)+row('Staatsangehörigkeit',D.staat):'')+
+  '</div>';
+
+  html+='<div class="sum-card"><div class="sum-head">📞 Kommunikation</div>'+
+  row('E-Mail',D.email)+row('Telefon',D.tel)+row('Mobil',D.mobil)+
+  row('Kommunikationsweg',(D.komm||[]).join(', ')||null)+
+  row('Korrespondenzsprache',(D.sprache||[]).join(', ')||null)+
+  '</div>';
+
+  html+='<div class="sum-card"><div class="sum-head">📍 Adresse & Finanzamt</div>'+
+  row('Adresse',[D.strasse,D.plz,D.ort].filter(Boolean).join(', ')||null)+
+  row('Bundesland',D.bula)+row('Land',D.land)+row('Finanzamt',D.fa)+
+  row('Steuernummer',D.steuernr_fa||D.steuernr_firm)+row('Steuer-ID',D.steuerid||D.steuerid_fa)+
+  row('USt-ID',D.ustid||D.ustid_fa)+row('Steuerarten',(D.steuerart||[]).join(', ')||null)+
+  row('USt-Rhythmus',D.ust_rhythmus)+row('Dauerfristverlängerung',D.dauerfrist)+'</div>';
+
+  if(isF){
+    var gs=D.gesellschafter||[];
+    var vt=D.vertreter||[];
+    if(gs.length>0){
+      html+='<div class="sum-card"><div class="sum-head">👥 Gesellschafter</div>';
+      gs.forEach(function(g,i){html+=row('Gesellschafter '+(i+1),[g.vn,g.nn].filter(Boolean).join(' ')+(g.anteil?' ('+g.anteil+'%)':''));});
+      html+='</div>';
+    }
+    if(vt.length>0){
+      html+='<div class="sum-card"><div class="sum-head">👤 Gesetzliche Vertreter</div>';
+      vt.forEach(function(v,i){html+=row('Vertreter '+(i+1),[v.vn,v.nn].filter(Boolean).join(' ')+(v.funk?' – '+v.funk:''));});
+      html+='</div>';
+    }
+    html+='<div class="sum-card"><div class="sum-head">🏢 Unternehmen</div>'+
+    row('Gegenstand',D.gegenstand)+row('Betriebsnummer',D.betriebsnr)+row('Anzahl Mitarbeiter',D.mitarb_anz)+
+    row('Gründungsdatum',D.gruendung)+row('Handelsregister-Nr.',D.hrbnr)+row('Registergericht',D.regericht)+
+    row('Wirtschaftsjahr',D.wjvon&&D.wjbis?D.wjvon+' – '+D.wjbis:null)+'</div>';
+  }
+
+  if(!isF&&kinder.length>0){
+    html+='<div class="sum-card"><div class="sum-head">👶 Kinder</div>';
+    kinder.forEach(function(k,i){html+=row('Kind '+(i+1),(k.vorname||'?')+' '+(k.nachname||'')+(k.geb?' (geb. '+k.geb+')':''));});
+    html+='</div>';
+  }
+
+  html+='<div class="sum-card"><div class="sum-head">🏦 Bankverbindung</div>'+
+  row('Kontoinhaber',D.ki)+row('IBAN',D.iban)+row('BIC',D.bic)+row('Kreditinstitut',D.bank)+row('SEPA-Lastschrift',D.sepa)+'</div>';
+
+  html+='<div class="sum-card"><div class="sum-head">✅ Leistungen</div>'+
+  row('Beauftragt',(D.leis||[]).join(', ')||null)+row('Ab Veranlagungsjahr',D.vz_ab)+
+  (isF?row('Buchhaltung ab',D.buch_ab):'')+
+  (D.notizen?row('Anmerkungen',D.notizen):'')+'</div>';
+
+  html+='<div class="sum-card"><div class="sum-head">🔒 Legitimation (GwG)</div>'+
+  row('Ausweisart',D.ausweisart||D.ap_ausweisart)+row('Ausweisnummer',D.ausweisnr||D.ap_ausweisnr)+
+  row('Ausgestellt von',D.ausweisbeh||D.ap_ausweisbeh)+row('Gültig bis',D.ausweisbis||D.ap_ausweisbis)+'</div>';
+
+  html+='<div style="margin-top:14px;text-align:center;color:var(--gray);font-size:11px">Erstellt am '+new Date().toLocaleDateString('de-DE')+' — Mandanten-Onboarding · Die Berater</div>';
+  return html;
+}
+
+function row(label,val){
+  var v=val&&String(val).trim()?String(val):'<span class="empty">—</span>';
+  return '<div class="sum-row"><span class="sum-k">'+label+'</span><span class="sum-v">'+v+'</span></div>';
+}
+
+// NAVIGATION
+function jumpToField(key){
+  var fieldMap={anrede:'Persönliche Daten',vorname:'Persönliche Daten',nachname:'Persönliche Daten',firmenname:'Unternehmen',rechtsform:'Unternehmen',ap_vn:'Ansprechpartner',ap_nn:'Ansprechpartner',email:'Kommunikation',strasse:'Adresse & Finanzamt',plz:'Adresse & Finanzamt',ort:'Adresse & Finanzamt',iban:'Bankverbindung'};
+  var targetStep=fieldMap[key];
+  if(targetStep){var idx=steps().indexOf(targetStep);if(idx>-1){currentStep=idx;renderAll();}}
+}
+
+function getPageContent(idx){
+  var s=steps(),name=s[idx];
+  if(idx===0) return pageType();
+  if(name==='Persönliche Daten') return pagePerson();
+  if(name==='Unternehmen') return pageCompany();
+  if(name==='Ansprechpartner') return pageContact();
+  if(name==='Familie & Kinder') return pageFamilie();
+  if(name==='Kommunikation') return pageKomm();
+  if(name==='Adresse & Finanzamt') return pageAddr();
+  if(name==='Bankverbindung') return pageBank();
+  if(name==='Leistungen') return pageLeistungen();
+  if(name==='Zusammenfassung') return pageSummary();
+  return '';
+}
+
+function renderAll(){
+  var s=steps(),total=s.length;
+  var nav=document.getElementById('stepsNav'),navHtml='';
+  for(var i=0;i<s.length;i++){
+    var stepErrs=i>0&&i<s.length-1?Object.keys(validateStep(s[i])).length>0:false;
+    var cls='step-btn';
+    if(i===currentStep) cls+=' active';
+    else if(i<currentStep) cls+=' done';
+    if(stepErrs&&i<currentStep) cls+=' has-error';
+    navHtml+='<button class="'+cls+'" onclick="currentStep='+i+';renderAll()"><span class="step-num">'+(i+1)+'</span>'+s[i]+'</button>';
+  }
+  nav.innerHTML=navHtml;
+  var pct=currentStep===0?0:Math.round(currentStep/(total-1)*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('stepPct').textContent=pct+'%';
+  document.getElementById('stepLabel').textContent='Schritt '+(currentStep+1)+' von '+total+' — '+s[currentStep];
+  var pages=document.getElementById('pages');
+  var html='<div>'+getPageContent(currentStep);
+  if(currentStep===0&&!D.mtype){}
+  else if(currentStep<total-1){
+    html+='<div class="nav-bar">';
+    if(currentStep>0) html+='<button class="btn-secondary" onclick="navigateStep(-1)">← Zurück</button>';
+    html+='<button class="btn-primary" onclick="navigateStep(1)">Weiter →</button>';
+    html+='</div>';
+  } else {
+    html+='<div class="nav-bar"><button class="btn-secondary" onclick="navigateStep(-1)">← Zurück</button>'+
+    '<button class="btn-print" onclick="window.print()">🖨 Als PDF speichern</button>'+
+    '<button class="btn-export" onclick="exportJSON()">⬇ JSON Export</button></div>';
+  }
+  html+='</div>';
+  pages.innerHTML=html;
+}
+
+function navigateStep(dir){
+  if(dir>0&&currentStep>0){
+    var s=steps(),stepName=s[currentStep],errs=validateStep(stepName);
+    if(Object.keys(errs).length>0){
+      if(!D._err)D._err={};
+      Object.keys(errs).forEach(function(k){D._err[k]=true;});
+      renderAll();
+      var firstErr=document.querySelector('.error,.err-msg.show');
+      if(firstErr)firstErr.scrollIntoView({behavior:'smooth',block:'center'});
+      return;
+    }
+  }
+  currentStep+=dir;
+  renderAll();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function exportJSON(){
+  var blob=new Blob([JSON.stringify({meta:{erstellt:new Date().toISOString(),mandantennr:D.intmandnr,typ:D.mtype},daten:D},null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='mandant_'+(D.intmandnr||'export')+'_'+new Date().toISOString().split('T')[0]+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+document.addEventListener('keydown',function(e){
+  if(e.ctrlKey&&e.key==='z'){e.preventDefault();undo();}
+  if(e.ctrlKey&&e.key==='y'){e.preventDefault();redo();}
+  if(e.altKey&&e.key==='ArrowRight'){e.preventDefault();if(currentStep<steps().length-1)navigateStep(1);}
+  if(e.altKey&&e.key==='ArrowLeft'){e.preventDefault();if(currentStep>0)navigateStep(-1);}
+});
+
+loadFromStorage();
+if(!D.intmandnr&&D.mtype)D.intmandnr=generateMandantenNr();
+pushHistory();
+renderAll();
+</script>
+</body>
+</html>
